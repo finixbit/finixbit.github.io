@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <title>Autonomous Hacking of PHP Web Applications at the Bytecode Level</title>
+
+<meta charset="UTF-8">
+
+<link rel="canonical" href="https://astro-decapcms-starter.netlify.app/posts/autonomous-Hacking-of-PHP-Web-Applications-at-the-Bytecode-Level/">
+
+<meta name="description" content="Finixbit">
+
+<meta name="robots" content="index, follow">
+
+<meta property="og:title" content="Finixbit - site/blog">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/opengraph-image.jpg">
+<meta property="og:url" content="https://astro-decapcms-starter.netlify.app/posts/autonomous-Hacking-of-PHP-Web-Applications-at-the-Bytecode-Level/">
+
+<meta property="og:image:url" content="/opengraph-image.jpg">
+
+
+
+<meta property="og:image:height">
+<meta property="og:image:alt" content="finixbit">
+
+
+
+
+
+
+
+<meta name="twitter:creator" content="@itsstormzz_">
+<link rel="icon" href="/favicon.svg"><link rel="sitemap" href="/sitemap-index.xml">
+<meta content="width=device-width, initial-scale=1" name="viewport"><meta content="Astro v2.10.15" name="generator"><meta content="/opengraph-image.jpg" name="twitter:image"><meta content="summary_large_image" name="twitter:card"><meta content="Finixbit - site/blog" name="twitter:title"><meta content="Finixbit" name="twitter:description"><meta content="@itsstormzz_" name="twitter:site">
+<link rel="stylesheet" href="/_astro/index.1fa2e291.css" /></head>
+
+  <body class="mx-auto flex min-h-screen max-w-[872px] flex-col gap-9 bg-neutral-950 px-10 py-8 text-sm text-neutral-400 md:gap-20 md:py-16">
+    <header class="z-40 flex w-full flex-col gap-2 md:flex-row md:justify-between">
+  <a href="https://twitter.com/finixbit" class="hover:text-neutral-100">@finixbit</a>
+
+  <nav role="navigation">
+    <ul role="list" class="flex flex-row gap-2">
+      <li>
+        <a href="/" class="hover:text-neutral-100">Home</a>
+      </li>
+      <li>/</li>
+      <li>
+        <a href="/posts" class="hover:text-neutral-100">Posts</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+    <div class="fixed z-0 h-[134px] w-[134px] lg:w-[300px] lg:h-[300px] rounded-full bg-orange-500 blur-[150px] md:blur-[350px] opacity-50 left-0 top-0">
+</div>
+    <div class="fixed z-0 h-[134px] w-[134px] lg:w-[300px] lg:h-[300px] rounded-full bg-violet-500 blur-[150px] md:blur-[350px] opacity-50 right-0 bottom-0">
+</div>
+    
+  <main class="post mx-auto flex w-full max-w-prose1 flex-col gap-4">
+    <header role="presentation">
+      <h2 class="text-md">
+        Autonomous Hacking of PHP Web Applications at the Bytecode Level
+      </h2>
+      <p class="italic">01/12/2023</p>
+    </header>
+
+    <h2 id="introduction">Introduction</h2>
+<p>It’s 5th June 2022, after hacking on PHP’s Virtual Machine, I chose to experiment with an algorithm of my creation called the <code>follow-back algorithm</code>, aimed at automatically detecting vulnerabilities in the PHP codebase at the bytecode level.</p>
+<p><img src="/images/follow-en-back-algo-3.png" alt="follow-back algorithm"></p>
+<!-- | Left side of image in text        | Right side of image in text           |
+| ------------- |:-------------:|
+| `1 - For instruction in CONCAT Instructions`     | `Find [Concat, EHO] Instructions` |
+| `2 - Get arguments in CONCAT Instruction`     | `Get [CONCAT, ECHO] arguments` |
+| `3 - Get SSA of Instruction argument`     | `for arg in arguments:` |
+| `4 - Trace back to a global variable`     | `if arg can be traced to GLOBAL VARIABLE and` |
+| `5 - Count Function calls from SSA instruction argument to Global Variable`     | `has not passed through any transformations:` |
+| `6 - Ignore certain function calls `     | `it is vulnerable ` |
+| `1 - For instruction in CONCAT Instructions`     |  |
+
+ -->
+<p><em>Left side of the image in text</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #B48EAD">1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> For instruction in CONCAT Instructions</span></span>
+<span class="line"><span style="color: #B48EAD">2</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> Get arguments in CONCAT Instruction</span></span>
+<span class="line"><span style="color: #B48EAD">3</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> Get SSA of Instruction argument</span></span>
+<span class="line"><span style="color: #B48EAD">4</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> Trace back to a global variable</span></span>
+<span class="line"><span style="color: #B48EAD">5</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> Count Function calls from SSA instruction argument to Global Variable</span></span>
+<span class="line"><span style="color: #B48EAD">6</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> Ignore certain function calls </span></span></code></pre>
+<p><em>Right side of the image in text</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #D8DEE9FF">Find </span><span style="color: #ECEFF4">[</span><span style="color: #D8DEE9FF">Concat</span><span style="color: #ECEFF4">,</span><span style="color: #D8DEE9FF"> EHO</span><span style="color: #ECEFF4">]</span><span style="color: #D8DEE9FF"> Instructions</span></span>
+<span class="line"><span style="color: #D8DEE9FF">Get </span><span style="color: #ECEFF4">[</span><span style="color: #D8DEE9FF">CONCAT</span><span style="color: #ECEFF4">,</span><span style="color: #D8DEE9FF"> ECHO</span><span style="color: #ECEFF4">]</span><span style="color: #D8DEE9FF"> arguments</span></span>
+<span class="line"><span style="color: #81A1C1">for</span><span style="color: #D8DEE9FF"> arg in arguments:</span></span>
+<span class="line"><span style="color: #D8DEE9FF">  </span><span style="color: #81A1C1">if</span><span style="color: #D8DEE9FF"> arg can be traced to GLOBAL VARIABLE and </span></span>
+<span class="line"><span style="color: #D8DEE9FF">     has not passed through any transformations:</span></span>
+<span class="line"><span style="color: #D8DEE9FF">  it is vulnerable </span></span></code></pre>
+<p>Following the research, I chose to assess it against the vulnerable web applications listed below. These applications are specifically designed for security professionals to enhance their skills and test their tools in a legal environment, serving as my test cases.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Name</th><th align="center">Vulns</th><th align="right">Report</th><th align="right">Github</th></tr></thead><tbody><tr><td>Damn Vulnerable Web Application (DVWA)</td><td align="center"><code>21</code></td><td align="right"><a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/vulnerabilities/vulnerable_web_apps.md#testing-with-dvwa">Report Link</a></td><td align="right"><a href="https://github.com/digininja/DVWA">Github Repo</a></td></tr><tr><td>OWASP Vulnerable Web Application Project</td><td align="center"><code>10</code></td><td align="right"><a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/vulnerabilities/vulnerable_web_apps.md#testing-with-owasp-vuln-web-app">Report Link</a></td><td align="right"><a href="https://github.com/OWASP/Vulnerable-Web-Application">Github Repo</a></td></tr><tr><td>Simple SQL Injection Training App</td><td align="center"><code>15</code></td><td align="right"><a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/vulnerabilities/vulnerable_web_apps.md#testing-with-sqlinjection-training-app">Report Link</a></td><td align="right"><a href="https://github.com/appsecco/sqlinjection-training-app">Github Repo</a></td></tr><tr><td>Vulnerable Web application made with PHP/SQL</td><td align="center"><code>6</code></td><td align="right"><a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/vulnerabilities/vulnerable_web_apps.md#testing-with-oste-vulnerable-web-application">Report Link</a></td><td align="right"><a href="https://github.com/OSTEsayed/OSTE-Vulnerable-Web-Application">Github Repo</a></td></tr><tr><td>InsecureTrust_Bank - Educational repo demonstrating web app vulnerabilities</td><td align="center"><code>5</code></td><td align="right"><a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/vulnerabilities/vulnerable_web_apps.md#testing-with-insecuretrust_bank">Report Link</a></td><td align="right"><a href="https://github.com/Hritikpatel/InsecureTrust_Bank">Github Repo</a></td></tr></tbody></table>
+<p>Additionally, I experimented with it on a few actual projects, and I plan to share the detailed report at a later date. Keep an eye out for updates on the reports by following me on Twitter <a href="https://twitter.com/finixbit">@finixbit</a>.</p>
+<hr>
+<h2 id="common-php-vulnerabilities">Common PHP Vulnerabilities</h2>
+<p>Before we delve into how the <code>follow-back algorithm</code> works. Let’s take a look at a few common PHP vulnerabilities. Most common PHP vulnerabilities get user input using global variables like <code>$_REQUEST</code>, <code>$_POST</code>, and <code>$_GET</code> and are later used in potentially vulnerable functions, generating SQL strings, echoing/printing back data to the user, etc. Example codes are below:</p>
+<p><em>Generating SQL Queries</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">sql</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">'</span><span style="color: #81A1C1">SELECT</span><span style="color: #A3BE8C"> </span><span style="color: #81A1C1">*</span><span style="color: #A3BE8C"> </span><span style="color: #81A1C1">FROM</span><span style="color: #A3BE8C"> employees </span><span style="color: #81A1C1">WHERE</span><span style="color: #A3BE8C"> employeeId </span><span style="color: #81A1C1">=</span><span style="color: #A3BE8C"> </span><span style="color: #ECEFF4">'</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_GET</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">data</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_GET</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">id</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span></code></pre>
+<p><em>Combining with other strings</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">user</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">User: </span><span style="color: #ECEFF4">'</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_GET</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">echo</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">user</span></span></code></pre>
+<p><em>Printing/Echoing out some data back to the user</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">echo</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_GET</span><span style="color: #A3BE8C">['p']</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span></code></pre>
+<p><em>Include pages from user-supplied input</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">include</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_GET</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">page</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span></code></pre>
+<hr>
+<h2 id="common-static-analyzers-regex-search-ast-pattern-based-search">Common Static Analyzers (REGEX Search, AST Pattern-based Search)</h2>
+<p>With the example codes above, vulnerabilities can be easily found using most static analyzers which are based on either <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">AST</a> pattern search or using <a href="https://en.wikipedia.org/wiki/Regular_expression">regular expression</a> search.<br>
+But gets tricky or incorrect if user-supplied inputs (<code>$_REQUEST</code>, <code>$_POST</code>, <code>$_GET</code>) aren’t directly used but travel across the different parts of the code before being used in potentially vulnerable functions like the examples below:</p>
+<p><em>Example (1) code where AST pattern search analysis fails</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">uname</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_POST</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">uname</span><span style="color: #ECEFF4">"</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">passwd</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_POST</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">password</span><span style="color: #ECEFF4">"</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">sql</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">SELECT</span><span style="color: #A3BE8C"> uname, passwd </span><span style="color: #81A1C1">FROM</span><span style="color: #A3BE8C"> users </span><span style="color: #81A1C1">WHERE</span><span style="color: #A3BE8C"> uname</span><span style="color: #81A1C1">=</span><span style="color: #A3BE8C">'</span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">uname</span><span style="color: #A3BE8C">'</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span></code></pre>
+<p><em>Example (2) code where AST pattern search analysis fails</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">id</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_GET</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">id</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">??</span><span style="color: #D8DEE9FF"> </span><span style="color: #B48EAD">1</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">cusId</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">id</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">anotherCusId</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">cusId</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">file_db</span><span style="color: #81A1C1">-></span><span style="color: #88C0D0">query</span><span style="color: #ECEFF4">(</span><span style="color: #ECEFF4">'</span><span style="color: #81A1C1">SELECT</span><span style="color: #A3BE8C"> </span><span style="color: #81A1C1">*</span><span style="color: #A3BE8C"> </span><span style="color: #81A1C1">FROM</span><span style="color: #A3BE8C"> customers </span><span style="color: #81A1C1">WHERE</span><span style="color: #A3BE8C"> customerId </span><span style="color: #81A1C1">=</span><span style="color: #A3BE8C"> </span><span style="color: #ECEFF4">'</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">anotherCusId</span><span style="color: #ECEFF4">)</span></span></code></pre>
+<p>AST pattern search or Regex search static analyzers fail for the example codes above because user-supplied input is not directly used but passes through other user-defined variables before it’s being used which is a limitation for our analysis.<br>
+To be able to find the above vulnerabilities, you need to be able to track how data moves across variables down to where data is used in a potentially vulnerable function.</p>
+<hr>
+<h2 id="overcoming-the-limitations-of-static-analysis-based-on-ast-or-regex-pattern-search">Overcoming the limitations of static analysis based on AST or REGEX pattern search</h2>
+<p>With the limitation of AST/REGEX pattern-based search, we need a way to track how user input data moves down to the designated sink function or instruction. This is where <a href="https://en.wikipedia.org/wiki/Data-flow_analysis">data-flow analysis</a> comes in.</p>
+<p>With Data-flow Analysis, you to track user input data defined in a variable down to specific destinated sink variables or instructions.</p>
+<p>There are other interesting data structures like <a href="https://en.wikipedia.org/wiki/Control-flow_graph">Control Flow Graph (CFG)</a>, Data Flow Graph (DFG), <a href="https://en.wikipedia.org/wiki/Static_single-assignment_form">Static single-assignment (SSA)</a> variables which are necessary for data-flow analysis.</p>
+<p>But these data structures (<code>CFG</code>, <code>DFG</code>, <code>SSA</code>) cannot be extracted from a raw AST data structure unless the AST is broken down into a simpler Intermediate Representation or Instructions.</p>
+<p>And PHP happens to have APIs (<code>zend_compile_file</code>) which translate PHP code/ASTs to its simpler <a href="https://en.wikipedia.org/wiki/Three-address_code">Three-address code</a> Zend bytecode instructions called <a href="https://x-team.com/blog/learn-about-php-opcodes/">opcodes</a> and also APIs (<code>zend_build_cfg</code>, <code>zend_build_dfg</code>, <code>zend_dump_ssa_variable</code>) to compute the CFG, DFG, SSA variables information.</p>
+<p>This got me excited because as someone who likes to perform a lot of program analysis on code, I always look out for frameworks and libraries which lift code from Code/<a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">AST</a> to <a href="https://en.wikipedia.org/wiki/Intermediate_representation">IR</a> along with other data structure like <a href="https://en.wikipedia.org/wiki/Control-flow_graph">Control Flow Graph (CFG)</a>, DFG, <a href="https://en.wikipedia.org/wiki/Static_single-assignment_form">SSA</a>, etc but in this case, PHP already had everything which also means no matter how complex PHP code is written, it gets reduced to 254 <code>Three-address code</code> instructions along with program analysis features.</p>
+<hr>
+<h2 id="php-bytecode-instructions">PHP Bytecode Instructions</h2>
+<p>Since we working at the PHP bytecode level, we need to understand a few things about it.<br>
+PHP bytecode instructions are called <code>Zend Opcodes</code> and are generated by the interpreter and passed to the Zend Engine for execution.</p>
+<p><img src="/images/opcode_rez.png" alt="follow-back algorithm"></p>
+<p>PHP bytecode is a Three-address code memory-based instruction instead of register-based or stack-based which is designed to be executed and discarded with each instruction having a numeric identifier called <code>OpCode</code> which specifies which operation to perform by the Zend Virtual Machine. More information on <a href="https://x-team.com/blog/learn-about-php-opcodes/">PHP Opcodes</a>.</p>
+<p><em>Example Hello World code with its Generated Opcodes below using <code>phpdbg</code>.</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">&#x3C;?</span><span style="color: #D8DEE9FF">php</span></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">var1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF">  </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">hello</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">echo</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">var1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">world</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">?></span></span></code></pre>
+<p><em>Generated Opcodes for the above <code>Hello World</code> code above</em></p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #D8DEE9">php</span><span style="color: #D8DEE9FF">@b4020519b49b</span><span style="color: #ECEFF4">:</span><span style="color: #81A1C1">/</span><span style="color: #D8DEE9">src</span><span style="color: #D8DEE9FF"># </span><span style="color: #D8DEE9">phpdbg</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9">p</span><span style="color: #81A1C1">*</span><span style="color: #D8DEE9FF"> </span><span style="color: #D8DEE9">test</span><span style="color: #81A1C1">/</span><span style="color: #D8DEE9">test0</span><span style="color: #ECEFF4">.</span><span style="color: #D8DEE9">php</span></span>
+<span class="line"><span style="color: #81A1C1">function</span><span style="color: #D8DEE9FF"> </span><span style="color: #88C0D0">name</span><span style="color: #D8DEE9FF">: </span><span style="color: #ECEFF4">(</span><span style="color: #D8DEE9">null</span><span style="color: #ECEFF4">)</span></span>
+<span class="line"><span style="color: #88C0D0">L1</span><span style="color: #D8DEE9FF">-8 </span><span style="color: #ECEFF4">{</span><span style="color: #D8DEE9">main</span><span style="color: #ECEFF4">}</span><span style="color: #D8DEE9FF">() </span><span style="color: #81A1C1">/</span><span style="color: #D8DEE9">src</span><span style="color: #81A1C1">/</span><span style="color: #D8DEE9">test</span><span style="color: #81A1C1">/</span><span style="color: #D8DEE9">test0</span><span style="color: #ECEFF4">.</span><span style="color: #D8DEE9">php</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">-</span><span style="color: #D8DEE9FF"> </span><span style="color: #B48EAD">0x7f70e0a6d300</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">+</span><span style="color: #D8DEE9FF"> </span><span style="color: #B48EAD">4</span><span style="color: #D8DEE9FF"> </span><span style="color: #D8DEE9">ops</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #D8DEE9">num</span><span style="color: #D8DEE9FF">    </span><span style="color: #D8DEE9">opcode_name</span><span style="color: #D8DEE9FF">             </span><span style="color: #D8DEE9">op1</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">op2</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">result</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ASSIGN</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">$var1</span><span style="color: #D8DEE9FF">                </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">hello</span><span style="color: #ECEFF4">"</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">1</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">CONCAT</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">$var1</span><span style="color: #D8DEE9FF">                </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">world</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">              </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">2</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ECHO</span><span style="color: #D8DEE9FF">                    </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">3</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">RETURN</span><span style="color: #81A1C1">&#x3C;-</span><span style="color: #B48EAD">1</span><span style="color: #81A1C1">></span><span style="color: #D8DEE9FF">              </span><span style="color: #B48EAD">1</span></span></code></pre>
+<p>Each instruction has an instruction index <code>num</code>, an <code>opcode_name</code> which is a string representation of its opcode number, 2 operands (<code>op1</code>, <code>op2</code>), and a return operand <code>result</code>.</p>
+<p>We can see 4 generated bytecode instructions (<code>ZEND_ASSIGN</code>, <code>ZEND_CONCAT</code>, <code>ZEND_ECHO</code>, <code>ZEND_RETURN</code>) with their arguments. The <a href="https://php-legacy-docs.zend.com/manual/php5/en/internals2.opcodes">list of OPCodes in PHP 7</a>.</p>
+<p>I like working at the instructions/bytecode level because it gives you granular information about how data is accurately moved in a program.</p>
+<hr>
+<h2 id="sources-and-sinks-instructions-or-variables">SOURCES and SINKS instructions or variables</h2>
+<p>To test my theory, we need to define the terminologies <code>SOURCES</code> and <code>SINKS</code> for our data flow analysis. The term <code>SOURCES</code> is where user input data is supplied and <code>SINKS</code> is destinated instructions or variables where user input might end up.</p>
+<p><strong>Source Example</strong></p>
+<p><code>FETCH_R</code> instruction from the generated bytecode below fetches the global variable <code>"_REQUEST"</code> from <code>op1</code> into a temporary variable <code>~0</code> in <code>result</code> and uses <code>FETCH_DIM_R</code> to retrieve <code>"name"</code> in <code>op2</code> from temporary variable <code>~0</code> (<code>op1</code>) into temporary variable <code>~1</code> (<code>result</code>).</p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #616E88"># User supplied Input data</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_REQUEST</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span></code></pre>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #616E88">// Generated Bytecode Instructions for the above User-supplied Input data code</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #D8DEE9">num</span><span style="color: #D8DEE9FF">    </span><span style="color: #D8DEE9">opcode_name</span><span style="color: #D8DEE9FF">             </span><span style="color: #D8DEE9">op1</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">op2</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">result</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">FETCH_R</span><span style="color: #81A1C1">&#x3C;</span><span style="color: #B48EAD">2</span><span style="color: #81A1C1">></span><span style="color: #D8DEE9FF">              </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">_REQUEST</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">                                </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">0</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">1</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">FETCH_DIM_R</span><span style="color: #D8DEE9FF">             </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">                   </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">               </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span></code></pre>
+<p><strong>Sink Example</strong></p>
+<p><code>ECHO</code> instruction prints out data stored in <code>op1</code> to the user. Even though in this particular example, <code>op1</code> is <code>"hello world"</code>, <code>op1</code> can also be a variable which can be a user-supplied input data.</p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #616E88"># destinated instructions or variables where user input might end up</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #81A1C1">echo</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">hello world</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span></code></pre>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #616E88">// Generated Bytecode Instructions for the above-destinated sink code</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #D8DEE9">num</span><span style="color: #D8DEE9FF">    </span><span style="color: #D8DEE9">opcode_name</span><span style="color: #D8DEE9FF">             </span><span style="color: #D8DEE9">op1</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">op2</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">result</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">3</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ECHO</span><span style="color: #D8DEE9FF">                    </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">hello world</span><span style="color: #ECEFF4">"</span></span></code></pre>
+<hr>
+<h2 id="understanding-the-follow-back-algorithm">Understanding the <code>follow-back</code> algorithm</h2>
+<p>From the given <code>SOURCE</code> and <code>SINK</code> examples above, using the generated bytecode below we want to be able to track the temporary variable <code>~3</code> in <code>op1</code> which is used in the <code>ECHO</code> instruction which is our <code>SINK</code> instruction back to <code>FETCH_R</code> and <code>FETCH_DIM_R</code> which are the <code>SOURCE</code> instructions where user input data is retrieved.</p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">var1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF">  </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_REQUEST</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">echo</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">var1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">world</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span></code></pre>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #616E88">// Generated Bytecode Instructions below</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #D8DEE9">num</span><span style="color: #D8DEE9FF">    </span><span style="color: #D8DEE9">opcode_name</span><span style="color: #D8DEE9FF">             </span><span style="color: #D8DEE9">op1</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">op2</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">result</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">FETCH_R</span><span style="color: #81A1C1">&#x3C;</span><span style="color: #B48EAD">2</span><span style="color: #81A1C1">></span><span style="color: #D8DEE9FF">              </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">_REQUEST</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">                                </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">0</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">1</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">FETCH_DIM_R</span><span style="color: #D8DEE9FF">             </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">                   </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">               </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">2</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ASSIGN</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">$var1</span><span style="color: #D8DEE9FF">                </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">3</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">CONCAT</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">$var1</span><span style="color: #D8DEE9FF">                </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">world</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">              </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">3</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">4</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ECHO</span><span style="color: #D8DEE9FF">                    </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">3</span></span></code></pre>
+<p>Once the sources and sinks are identified in our instructions, the next step involves extracting all variable arguments used at the potential sink instruction.<br>
+Afterwards, repeat the steps below until the current instruction is the source instruction that uses user-defined input.</p>
+<p>1 - find out the instructions where these variables are defined using PHP’s Data-flow SSA APIs and set the current instruction to where these variables are defined<br>
+2 - retrieve all variable arguments (excluding constants arguments) used in the current instruction<br>
+3 - repeat step <code>1</code> if the current instruction isn’t our source instruction that uses user-defined input.</p>
+<!-- We find out the location or instruction where these variables are defined using PHP's Data-flow SSA APIs and set the current instruction to where these variables are defined and retrieve all variable arguments (excluding constants arguments) used in the current instruction, and iterate through this process until we reach the source instruction that uses user-defined input. -->
+<p><img src="/images/gifs/008_rez.gif" alt="follow-back algorithm"></p>
+<h3 id="manual-walkthrough">Manual walkthrough</h3>
+<p>Let’s manually walk through the <code>follow-back</code> algorithm using the simple vulnerable code below which gets user input from <code>$_REQUEST['name']</code>, stores the data in <code>$var1</code> and prints it back to the user using <code>echo</code>.</p>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">var1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">=</span><span style="color: #D8DEE9FF">  </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">_REQUEST</span><span style="color: #ECEFF4">[</span><span style="color: #ECEFF4">'</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">'</span><span style="color: #ECEFF4">]</span><span style="color: #81A1C1">;</span></span>
+<span class="line"><span style="color: #81A1C1">echo</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">$</span><span style="color: #D8DEE9">var1</span><span style="color: #D8DEE9FF"> </span><span style="color: #81A1C1">.</span><span style="color: #D8DEE9FF"> </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">world</span><span style="color: #ECEFF4">"</span><span style="color: #81A1C1">;</span></span></code></pre>
+<pre is:raw="" class="astro-code nord" style="background-color: #2e3440ff; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color: #616E88">// Generated Bytecode Instructions for the vulnerable PHP code above</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #D8DEE9">num</span><span style="color: #D8DEE9FF">    </span><span style="color: #D8DEE9">opcode_name</span><span style="color: #D8DEE9FF">             </span><span style="color: #D8DEE9">op1</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">op2</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">result</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">FETCH_R</span><span style="color: #81A1C1">&#x3C;</span><span style="color: #B48EAD">2</span><span style="color: #81A1C1">></span><span style="color: #D8DEE9FF">              </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">_REQUEST</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">                                </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">0</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">1</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">FETCH_DIM_R</span><span style="color: #D8DEE9FF">             </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">0</span><span style="color: #D8DEE9FF">                   </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">name</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">               </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">2</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ASSIGN</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">$var1</span><span style="color: #D8DEE9FF">                </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">1</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">3</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">CONCAT</span><span style="color: #D8DEE9FF">                  </span><span style="color: #D8DEE9">$var1</span><span style="color: #D8DEE9FF">                </span><span style="color: #ECEFF4">"</span><span style="color: #A3BE8C">world</span><span style="color: #ECEFF4">"</span><span style="color: #D8DEE9FF">              </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">3</span></span>
+<span class="line"><span style="color: #D8DEE9FF">#</span><span style="color: #B48EAD">4</span><span style="color: #D8DEE9FF">     </span><span style="color: #D8DEE9">ECHO</span><span style="color: #D8DEE9FF">                    </span><span style="color: #81A1C1">~</span><span style="color: #B48EAD">3</span></span></code></pre>
+<p>We start by pinpointing our <code>SINK</code> instruction, which, in this instance, is the <code>ECHO</code> instruction. The <code>ECHO</code> instruction accepts a sole argument <code>op1</code> which holds a temporary variable named <code>~3</code>, and outputs the content of <code>~3</code>.</p>
+<p><img src="/images/gifs/001_rez.gif" alt="follow-back algorithm"></p>
+<p>We need to find out where the temporary variable <code>~3</code> is defined and in this case, it is defined by instruction num <code>#3</code> which is the <code>CONCAT</code> instruction.</p>
+<p><img src="/images/gifs2/00000_rez.gif" alt="follow-back algorithm"></p>
+<p>Once we have where <code>~3</code> is defined, we can look for all arguments with variables used in the creation or definition of <code>~3</code>.<br>
+The only variable used here is only <code>$var1</code> in <code>op1</code>. Even though <code>op2</code> holds data (<code>"world"</code>), it can’t be used because it’s a constant value and not a variable.</p>
+<p><img src="/images/gifs2/00001_rez.gif" alt="follow-back algorithm"></p>
+<p>We now move to get where <code>$var1</code> used in the <code>CONCAT</code> instruction is defined or created.<br>
+<code>$var1</code> is defined at instruction num <code>#2</code> which is an <code>ASSIGN</code> instruction.</p>
+<p><img src="/images/gifs2/00002_rez.gif" alt="follow-back algorithm"></p>
+<p>We repeat the cycle by retrieving all arguments with variables used in the creation or definition of <code>$var1</code>.<br>
+The only variable used here is the temporary variable <code>~1</code> in <code>op2</code>.</p>
+<p><img src="/images/gifs2/00003_rez.gif" alt="follow-back algorithm"></p>
+<p>We still repeat the cycle by getting where temporary variable <code>~1</code> is defined which is instruction num <code>#1</code> which is a <code>FETCH_DIM_R</code> instruction.</p>
+<p><img src="/images/gifs2/00004_rez.gif" alt="follow-back algorithm"></p>
+<p>So again we can retrieve variable arguments used in the definition of <code>~1</code>.<br>
+The only variable used here is the temporary variable <code>~0</code> in <code>op1</code> because even though <code>op2</code> holds a data value <code>"name"</code>, it cannot be utilized as it represents a constant rather than a variable.</p>
+<p><img src="/images/gifs2/00005_rez.gif" alt="follow-back algorithm"></p>
+<p>the cycle is then repeated to find where temporary variable <code>~0</code> in <code>op1</code> is defined, which is instruction num <code>#0</code>, a <code>FETCH_R&#x3C;2></code> instruction.</p>
+<p><img src="/images/gifs2/00006_rez.gif" alt="follow-back algorithm"></p>
+<p>While repeating the cycle, we need to constantly check if we have arrived at our <code>SOURCE</code> input or instruction <code>(FETCH_DIM_R, FETCH_R)</code> and from the walk-through, we have arrived at the <code>SOURCE</code> input.</p>
+<p>After accurately tracing back from a potential <code>SINK</code> to the input <code>SOURCE</code>, we can now retrieve the source code lines from all the recorded instructions along the paths and manually validate the Vulnerability.</p>
+<hr>
+<h2 id="limitation-of-follow-back-algorithm">Limitation of Follow-back Algorithm</h2>
+<p>Some variables are defined from function calls and the functions could be validators. This can be resolved by adding logic to record and check variables defined from function call instructions.</p>
+<p>Also, some variables are passed as arguments to function calls which could return a new variable from the function return. This can also be resolved by adding logic to check if a variable is passed to a function call returns a newly created/defined variable.</p>
+<p>This currently only works for PHP codebase which uses global variables (<code>$_REQUEST</code>, <code>$_POST</code>, <code>$_GET</code>) directly in all files but can be modified to use specific input instructions.</p>
+<p>Other limitations are inconsistencies in DFG data structure from PHP probably due to incomplete code.</p>
+<hr>
+<h2 id="source-code">Source Code</h2>
+<p>The implementation of the Follow-back Algorithm can be found in <a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/detectors/code_injection.py">php-bytecode-security-framework/detectors/code_injection.py</a>, utilizing the <a href="https://github.com/finixbit/php-bytecode-security-framework">finixbit/php-bytecode-security-framework</a>.</p>
+<p>Below is an illustrative scan of <a href="https://github.com/digininja/DVWA">Damn Vulnerable Web Application (DVWA)</a> is provided as an example using <a href="https://github.com/finixbit/php-bytecode-security-framework/blob/master/detectors/code_injection.py">php-bytecode-security-framework/detectors/code_injection.py</a>.</p>
+<p><img src="/images/demo3.gif" alt="follow-back algorithm"></p>
+<p>Refer to the <a href="https://github.com/finixbit/php-bytecode-security-framework">README.md</a> for instructions on configuring a test environment.</p>
+<hr>
+<h2 id="references">References</h2>
+<p>Some useful links to learn more about PHP internals and its opcode.</p>
+<p><a href="https://phpbuilder.com/php-and-zend-engine-internals/">PHP and Zend Engine Internals</a></p>
+<p><a href="https://github.com/pangudashu/php7-internal">Analysis of PHP7 Kernel</a></p>
+<p><a href="https://www.npopov.com/2017/04/14/PHP-7-Virtual-machine.html">PHP 7 Virtual Machine</a></p>
+<p><a href="https://x-team.com/blog/learn-about-php-opcodes/">LEARN ABOUT PHP OPCODES</a></p>
+<p><a href="https://www.phpinternalsbook.com/">PHP Internals Book</a></p>
+  </main>
+
+    
+  </body>
+</html>
