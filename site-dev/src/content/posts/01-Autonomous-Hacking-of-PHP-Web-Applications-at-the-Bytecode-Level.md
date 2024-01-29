@@ -1,7 +1,7 @@
 ---
 title: "Autonomous Hacking of PHP Web Applications at the Bytecode Level"
 publishedAt: 2023-12-01
-description: "Lorem ipsum dolor sit amet consectetur et ultrices blandit neque ege"
+description: "Autonomous Hacking of PHP Web Applications at the Bytecode Level"
 slug: "autonomous-Hacking-of-PHP-Web-Applications-at-the-Bytecode-Level"
 isPublish: true
 ---
