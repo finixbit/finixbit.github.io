@@ -16,5 +16,5 @@ npm run dev -- --port 4000 --host
 ```sh
 cd site-dev
 npm run build
-mv dist/* ../site/
+mv dist/* ../
 ```
