@@ -2,7 +2,7 @@
 title: "Autonomous Hacking of Programs for a 6-month-old baby"
 publishedAt: 2024-01-29
 description: "Autonomous Hacking of Programs for a 6-month-old baby"
-slug: "autonomous-hacking-of-programs-for-a-6-month-old-baby"
+slug: "Autonomous-Hacking-of-Programs-for-a-6-month-old-baby"
 isPublish: true
 ---
 
